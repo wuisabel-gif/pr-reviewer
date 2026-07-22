@@ -29,3 +29,6 @@ jobs:
           auth-header: ${{ vars.REVIEW_AUTH_HEADER || 'Authorization' }}
           auth-scheme: ${{ vars.REVIEW_AUTH_SCHEME || 'Bearer' }}
           response-json-pointer: ${{ vars.REVIEW_RESPONSE_JSON_POINTER }}
+          passes: ${{ vars.REVIEW_PASSES || '1' }}
+          vote-threshold: ${{ vars.REVIEW_VOTE_THRESHOLD }}
+          context-bytes: ${{ vars.REVIEW_CONTEXT_BYTES || '60000' }}
