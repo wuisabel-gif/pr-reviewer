@@ -123,3 +123,7 @@ Responses wrapped in `review`, `output`, `result`, or `data` are also accepted, 
 - Repo context: for each changed file, also send the full file content and its direct imports instead of just the diff.
 - A `REVIEW.md` rules file in the repo root that gets appended to the system prompt.
 - Benchmarking: replay merged PRs with known bugs and score recall/precision.
+
+## License
+
+Licensed under the [MIT License](LICENSE).
