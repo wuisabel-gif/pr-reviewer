@@ -1,6 +1,6 @@
 [package]
 name = "pr-reviewer"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Agent-agnostic AI PR reviewer as a GitHub Action"
 license = "MIT"
