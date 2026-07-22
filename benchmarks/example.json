@@ -1,0 +1,15 @@
+{
+  "cases": [
+    {
+      "name": "division by zero",
+      "repository": "example/calculator",
+      "diff": "diff --git a/src/lib.rs b/src/lib.rs\n--- /dev/null\n+++ b/src/lib.rs\n@@ -0,0 +1,3 @@\n+pub fn average(total: f64, count: usize) -> f64 {\n+    total / count as f64\n+}\n",
+      "expected": [
+        {
+          "path": "src/lib.rs",
+          "line": 2
+        }
+      ]
+    }
+  ]
+}

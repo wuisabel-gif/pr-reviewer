@@ -35,6 +35,22 @@ inputs:
     description: Optional JSON Pointer locating a normalized review in a webhook response
     required: false
     default: ""
+  passes:
+    description: Number of independent model passes, from 1 to 7
+    required: false
+    default: "1"
+  vote-threshold:
+    description: Votes required to keep a finding; defaults to a strict majority
+    required: false
+    default: ""
+  context-bytes:
+    description: Maximum repository-context bytes; set to 0 to disable context
+    required: false
+    default: "60000"
+  bot-login:
+    description: GitHub login whose prior comments are trusted for deduplication
+    required: false
+    default: "github-actions[bot]"
 
 runs:
   using: composite
@@ -56,6 +72,10 @@ runs:
         REVIEW_AUTH_HEADER: ${{ inputs.auth-header }}
         REVIEW_AUTH_SCHEME: ${{ inputs.auth-scheme }}
         REVIEW_RESPONSE_JSON_POINTER: ${{ inputs.response-json-pointer }}
+        REVIEW_PASSES: ${{ inputs.passes }}
+        REVIEW_VOTE_THRESHOLD: ${{ inputs.vote-threshold }}
+        REVIEW_CONTEXT_BYTES: ${{ inputs.context-bytes }}
+        REVIEW_BOT_LOGIN: ${{ inputs.bot-login }}
         PR_REVIEWER_ACTION_PATH: ${{ github.action_path }}
       run: cargo run --release --locked --manifest-path "$PR_REVIEWER_ACTION_PATH/Cargo.toml"
 

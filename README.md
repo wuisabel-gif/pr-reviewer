@@ -15,7 +15,7 @@ The reusable action can also be added directly:
 
 ```yaml
 - name: Review pull request
-  uses: wuisabel-gif/pr-reviewer@v0.1.1
+  uses: wuisabel-gif/pr-reviewer@v0.2.0
   with:
     api-key: ${{ secrets.REVIEW_API_KEY }}
     provider: ${{ vars.REVIEW_PROVIDER || 'anthropic' }}
@@ -27,10 +27,33 @@ Pinning a full commit SHA instead of a release tag provides the strongest supply
 ## How it works
 
 1. The workflow triggers on `pull_request_target` events and runs the trusted, versioned reviewer action.
-2. The binary reads the PR number from the Actions event payload, then fetches the unified diff from the GitHub API.
-3. It parses the diff to build a map of which lines GitHub will actually accept comments on (added and context lines inside hunks). This prevents 422 errors from the Reviews API when the model hallucinates a line number.
-4. It sends the diff through the configured provider adapter and requests a summary plus findings with `path`, `line`, `severity`, and `comment`. OpenAI Responses uses a strict JSON schema. Other adapters use the same normalized output contract. The shared prompt tells the model to skip style nitpicks and only flag real bugs.
-5. Valid findings become line comments on the PR review. Findings whose line numbers fall outside the diff get folded into the summary body instead of being dropped. If GitHub still rejects the review, it falls back to posting the summary alone.
+2. The binary fetches the unified diff, changed-file contents, and direct imports from the pull request's head revision. Context is byte-bounded and binary files are skipped.
+3. It loads `REVIEW.md` from the trusted base revision, so a pull request cannot alter its own review rules.
+4. It runs the configured number of independent review passes. When voting is enabled, only findings reported at the same file and line by the configured threshold survive.
+5. It removes findings already posted by this action on earlier pushes, then validates remaining line anchors against the diff.
+6. Valid findings become line comments. Findings outside the diff or comment limit are included in the summary, and a rejected batch falls back without losing findings.
+
+## v0.2 features
+
+- **Consensus reviews:** set `REVIEW_PASSES` from 1 to 7. `REVIEW_VOTE_THRESHOLD` defaults to a strict majority.
+- **Cross-push deduplication:** inline comments contain stable, hidden location fingerprints that suppress repeat comments on later pushes.
+- **Repository context:** changed text files and resolvable direct Rust, JavaScript/TypeScript, and Python imports are sent with the diff under a configurable byte budget.
+- **Trusted rules:** a root-level `REVIEW.md` on the base branch is appended as review policy.
+- **Benchmarks:** JSON suites replay known diffs and report location-level precision and recall.
+
+Multiple passes increase model usage proportionally, so the default remains one pass. For majority voting, start with `REVIEW_PASSES=3`; the default threshold will be 2.
+
+## Review rules
+
+Add `REVIEW.md` to the repository's default branch to define project-specific review policy:
+
+```markdown
+# Review policy
+
+- Treat authentication and authorization regressions as high severity.
+- Ignore generated files under `src/generated/`.
+- Database migrations must be backward compatible.
+```
 
 ## Provider setup
 
@@ -80,6 +103,8 @@ Use `REVIEW_PROVIDER=webhook` for an agent that does not implement an OpenAI-com
   "system": "review instructions",
   "repository": "owner/repo",
   "diff": "unified diff",
+  "context": "changed files and direct imports",
+  "rules": "trusted REVIEW.md contents",
   "output_schema": { "type": "object" }
 }
 ```
@@ -114,15 +139,22 @@ Responses wrapped in `review`, `output`, `result`, or `data` are also accepted, 
 - `REVIEW_AUTH_HEADER`: credential header for OpenAI-compatible and webhook requests; defaults to `Authorization`.
 - `REVIEW_AUTH_SCHEME`: credential prefix; defaults to `Bearer`. Set it to `none` for raw-key headers such as `api-key`.
 - `REVIEW_RESPONSE_JSON_POINTER`: optional RFC 6901 JSON Pointer for extracting a normalized review from a custom webhook response.
-- `MAX_DIFF_BYTES` and `MAX_COMMENTS` are constants in `src/main.rs`. Large diffs get truncated with a marker so the model knows it saw a partial view.
+- `REVIEW_PASSES`: independent model calls per review, from 1 to 7; defaults to `1`.
+- `REVIEW_VOTE_THRESHOLD`: passes that must report the same path and line; defaults to a strict majority.
+- `REVIEW_CONTEXT_BYTES`: repository-context budget; defaults to `60000`, and `0` disables context fetching.
+- `REVIEW_BOT_LOGIN`: only this author's hidden fingerprints are trusted for deduplication; defaults to `github-actions[bot]`.
+- Diff and line-comment limits are bounded internally to control request and GitHub API sizes.
 
-## Ideas for v2
+## Benchmarking
 
-- Majority voting: run the review N times and keep only findings that appear in most passes to suppress false positives.
-- Dedup across pushes: fetch existing review comments and skip findings the bot already made, so force-pushes don't spam.
-- Repo context: for each changed file, also send the full file content and its direct imports instead of just the diff.
-- A `REVIEW.md` rules file in the repo root that gets appended to the system prompt.
-- Benchmarking: replay merged PRs with known bugs and score recall/precision.
+Create a suite using [`benchmarks/example.json`](benchmarks/example.json), then run it with any configured provider:
+
+```bash
+REVIEW_PROVIDER=openai OPENAI_API_KEY=sk-... \
+cargo run --release -- --benchmark benchmarks/example.json
+```
+
+Each expected finding is matched by `path` and new-side `line`. The runner prints aggregate precision and recall as JSON, making it suitable for comparing providers, prompts, vote thresholds, and future releases.
 
 ## License
 
