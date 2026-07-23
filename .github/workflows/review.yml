@@ -1,4 +1,4 @@
-name: AI PR Review
+name: SecondOpinion
 
 on:
   pull_request_target:
