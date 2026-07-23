@@ -1,10 +1,10 @@
 [package]
-name = "pr-reviewer"
+name = "secondopinion"
 version = "0.2.0"
 edition = "2021"
-description = "Agent-agnostic AI PR reviewer as a GitHub Action"
+description = "Agent-agnostic AI pull request reviews as a GitHub Action"
 license = "MIT"
-repository = "https://github.com/wuisabel-gif/pr-reviewer"
+repository = "https://github.com/wuisabel-gif/secondopinion"
 readme = "README.md"
 
 [dependencies]

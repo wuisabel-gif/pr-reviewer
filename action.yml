@@ -1,4 +1,4 @@
-name: pr-reviewer
+name: secondopinion
 description: Agent-agnostic AI pull request reviews with interchangeable model backends
 author: wuisabel-gif
 
@@ -58,7 +58,7 @@ runs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4 # stable
 
-    - name: Run PR reviewer
+    - name: Run secondopinion
       shell: bash
       env:
         GITHUB_TOKEN: ${{ github.token }}
@@ -76,8 +76,8 @@ runs:
         REVIEW_VOTE_THRESHOLD: ${{ inputs.vote-threshold }}
         REVIEW_CONTEXT_BYTES: ${{ inputs.context-bytes }}
         REVIEW_BOT_LOGIN: ${{ inputs.bot-login }}
-        PR_REVIEWER_ACTION_PATH: ${{ github.action_path }}
-      run: cargo run --release --locked --manifest-path "$PR_REVIEWER_ACTION_PATH/Cargo.toml"
+        SECONDOPINION_ACTION_PATH: ${{ github.action_path }}
+      run: cargo run --release --locked --manifest-path "$SECONDOPINION_ACTION_PATH/Cargo.toml"
 
 branding:
   icon: eye

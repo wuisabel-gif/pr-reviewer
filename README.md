@@ -1,4 +1,4 @@
-# pr-reviewer
+# secondopinion
 
 > **Change the agent, not the reviewer.**
 
@@ -15,7 +15,7 @@ The reusable action can also be added directly:
 
 ```yaml
 - name: Review pull request
-  uses: wuisabel-gif/pr-reviewer@v0.2.0
+  uses: wuisabel-gif/secondopinion@v0.2.0
   with:
     api-key: ${{ secrets.REVIEW_API_KEY }}
     provider: ${{ vars.REVIEW_PROVIDER || 'anthropic' }}
