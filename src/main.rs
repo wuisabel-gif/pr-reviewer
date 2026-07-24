@@ -16,7 +16,7 @@ fn main() -> Result<()> {
     if args.get(1).map(String::as_str) == Some("--benchmark") {
         let path = args
             .get(2)
-            .ok_or_else(|| anyhow::anyhow!("usage: secondopinion --benchmark <suite.json>"))?;
+            .ok_or_else(|| anyhow::anyhow!("usage: second-opinion --benchmark <suite.json>"))?;
         return benchmark::run(
             path,
             provider,

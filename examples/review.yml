@@ -1,4 +1,4 @@
-name: SecondOpinion
+name: Second-Opinion
 
 on:
   pull_request_target:
@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Review pull request
-        uses: wuisabel-gif/secondopinion@v0.2.0
+        uses: wuisabel-gif/second-opinion@v0.2.2
         with:
           api-key: ${{ secrets.REVIEW_API_KEY }}
           provider: ${{ vars.REVIEW_PROVIDER || 'anthropic' }}
