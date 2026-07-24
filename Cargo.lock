@@ -204,8 +204,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "secondopinion"
-version = "0.2.0"
+name = "second-opinion"
+version = "0.2.3"
 dependencies = [
  "anyhow",
  "base64",

@@ -414,10 +414,14 @@ fn fingerprints_from_comments(comments: &[Value], bot_login: &str) -> BTreeSet<S
 }
 
 fn marker_value(body: &str) -> Option<&str> {
-    ["<!-- secondopinion:", "<!-- pr-reviewer:"]
-        .iter()
-        .find_map(|prefix| body.split(prefix).nth(1))
-        .and_then(|rest| rest.split(" -->").next())
+    [
+        "<!-- second-opinion:",
+        "<!-- secondopinion:",
+        "<!-- pr-reviewer:",
+    ]
+    .iter()
+    .find_map(|prefix| body.split(prefix).nth(1))
+    .and_then(|rest| rest.split(" -->").next())
 }
 
 pub fn finding_fingerprint(finding: &Finding) -> String {
@@ -462,7 +466,7 @@ pub fn post_review(
                 "line": finding.line,
                 "side": "RIGHT",
                 "body": format!(
-                    "**[{}]** {}\n\n<!-- secondopinion:{marker} -->",
+                    "**[{}]** {}\n\n<!-- second-opinion:{marker} -->",
                     finding.severity, finding.comment
                 ),
             }));
@@ -471,7 +475,7 @@ pub fn post_review(
         }
     }
 
-    let mut body = format!("## secondopinion review\n\n{}", review.summary);
+    let mut body = format!("## second-opinion review\n\n{}", review.summary);
     if !orphaned.is_empty() {
         body.push_str("\n\n**Findings outside the diff or comment limit:**\n");
         body.push_str(&orphaned.join("\n"));
@@ -508,7 +512,7 @@ fn github_request(token: &str, url: &str) -> ureq::Request {
     ureq::get(url)
         .set("Authorization", &format!("Bearer {token}"))
         .set("Accept", "application/vnd.github+json")
-        .set("User-Agent", "secondopinion")
+        .set("User-Agent", "second-opinion")
         .set("X-GitHub-Api-Version", "2022-11-28")
 }
 
@@ -516,7 +520,7 @@ fn github_post_request(token: &str, url: &str) -> ureq::Request {
     ureq::post(url)
         .set("Authorization", &format!("Bearer {token}"))
         .set("Accept", "application/vnd.github+json")
-        .set("User-Agent", "secondopinion")
+        .set("User-Agent", "second-opinion")
         .set("X-GitHub-Api-Version", "2022-11-28")
 }
 
@@ -634,8 +638,12 @@ mod tests {
     #[test]
     fn extracts_comment_marker() {
         assert_eq!(
-            marker_value("comment\n<!-- secondopinion:abc123 -->"),
+            marker_value("comment\n<!-- second-opinion:abc123 -->"),
             Some("abc123")
+        );
+        assert_eq!(
+            marker_value("compat\n<!-- secondopinion:compat123 -->"),
+            Some("compat123")
         );
         assert_eq!(
             marker_value("legacy\n<!-- pr-reviewer:legacy123 -->"),
@@ -654,8 +662,8 @@ mod tests {
     #[test]
     fn dedup_trusts_only_configured_author() {
         let comments = vec![
-            json!({"user":{"login":"attacker"},"body":"<!-- secondopinion:forged -->"}),
-            json!({"user":{"login":"github-actions[bot]"},"body":"<!-- secondopinion:trusted -->"}),
+            json!({"user":{"login":"attacker"},"body":"<!-- second-opinion:forged -->"}),
+            json!({"user":{"login":"github-actions[bot]"},"body":"<!-- second-opinion:trusted -->"}),
         ];
         let values = fingerprints_from_comments(&comments, "github-actions[bot]");
         assert_eq!(values, BTreeSet::from(["trusted".to_string()]));

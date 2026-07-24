@@ -1,4 +1,4 @@
-name: SecondOpinion Agent-Agnostic PR Review
+name: Second-Opinion Agent-Agnostic PR Review
 description: Agent-agnostic AI pull request reviews with interchangeable model backends
 author: wuisabel-gif
 
@@ -58,7 +58,7 @@ runs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4 # stable
 
-    - name: Run secondopinion
+    - name: Run second-opinion
       shell: bash
       env:
         GITHUB_TOKEN: ${{ github.token }}
@@ -76,8 +76,8 @@ runs:
         REVIEW_VOTE_THRESHOLD: ${{ inputs.vote-threshold }}
         REVIEW_CONTEXT_BYTES: ${{ inputs.context-bytes }}
         REVIEW_BOT_LOGIN: ${{ inputs.bot-login }}
-        SECONDOPINION_ACTION_PATH: ${{ github.action_path }}
-      run: cargo run --release --locked --manifest-path "$SECONDOPINION_ACTION_PATH/Cargo.toml"
+        SECOND_OPINION_ACTION_PATH: ${{ github.action_path }}
+      run: cargo run --release --locked --manifest-path "$SECOND_OPINION_ACTION_PATH/Cargo.toml"
 
 branding:
   icon: eye
